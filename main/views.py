@@ -1,8 +1,10 @@
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
-from .models import Article, Category,Tags, Author
+from django.contrib.auth.decorators import login_required
+
+from .models import Article, Category,Tags, Comments
 from .forms import ArticleForm, CategoryForm, CommentForm
-from django.http import Http404
+
 
 
 
@@ -38,39 +40,49 @@ def get_article_by_tag(request, tag_id):
 
 def detail_article(request, article_id):
     article = get_object_or_404(Article, id=article_id)
+    form = CommentForm()
 
+    context = {
+        'article': article,
+        'form': form,
+    }
+
+    return render(request, 'main/detail_article.html', context)
+
+
+def add_comment(request, pk):
+    article = get_object_or_404(Article, id=pk)
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             if request.user.is_authenticated:
-                author = Author.objects.get(user=request.user)
-                comment.user = author
-                comment.article= article
+                comment.user = request.user.author
+                comment.article = article
                 comment.save()
-                error_message= 'Авторизуйтесь, чтобы добавлять комментарии'
-    else:
-        form = CommentForm()
-        error_message =None
-    context = {
-        'article': article,
-        'form': form,
-        'error_message': error_message
-    }
+                return redirect('detail_article', article.id)
+            error_message = 'Авторизуйтесь, чтобы добавлять комментарии'
 
-    return render(request, 'main/detail_article.html', context)
+        else:
+            form = CommentForm()
+            error_message = None
+
+    return redirect('main/detail_article.html', {'error_message': error_message, 'form':form})
 
 
-"""
-def detail_article(request, article_id):
+
+
+def delete_comment(request, comment_id, article_id):
+    comment = get_object_or_404(Comments, id=comment_id)
     article = get_object_or_404(Article, id=article_id)
-    context = {
-        'article': article
-    }
 
-    return render(request, 'main/detail_article.html', context)
+    if request.user != article.author or request.user != comment.user:
+        comment.delete()
+        return redirect('detail_article', article_id=article.id)
 
-"""
+    return HttpResponseForbidden("У вас нет прав для удаление этого комментария ")
+
+
 
 def create_article(request):
 
@@ -122,9 +134,13 @@ def delete_article(request, article_id):
     return render(request, 'main/delete_article.html', context)
 
 
+@login_required
 def edit_article(request, article_id):
     article = get_object_or_404(Article, id=article_id)
+
     if request.method == 'POST':
+        if request.user != article.author:
+            return HttpResponseForbidden("У вас нет прав для редактирования этой статьи.")
         form = ArticleForm(request.POST, request.FILES, instance=article)
         if form.is_valid():
             article = form.save()
@@ -142,9 +158,8 @@ def edit_article(request, article_id):
         form = ArticleForm(instance=article)
 
     context = {
-            'article': article,
-            'form': form
-        }
+        'article': article,
+        'form': form
+    }
 
     return render(request, 'main/edit_article.html', context)
-

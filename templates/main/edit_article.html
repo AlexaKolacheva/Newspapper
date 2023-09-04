@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+
 {% block content %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
@@ -15,6 +17,7 @@
     </div>
     {% endfor %}
 
+    <a href="{% url 'detail_article' article.id %}" class="button"><p> Отменить </p></a>
     <button type="submit">Save Changes</button>
 </form>
 {% endblock content %}

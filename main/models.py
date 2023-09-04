@@ -1,4 +1,8 @@
 from django.db import models
+from django.urls import reverse
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+
 from accounts.models import CustomUser
 
 
@@ -47,15 +51,21 @@ class Article(models.Model):
     class Meta:
         ordering = ['-published_date']
 
-    # def get_absolute_url(self):
-    #    return reverse("article_detail", kwargs={"pk": self.pk})
+    def get_absolute_url(self):
+        return reverse("article_detail", kwargs={"pk": self.pk})
 
 
 class Comments(models.Model):
     user = models.ForeignKey(Author, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
-    text = models.TextField( default='Type some text here...')
+    text = models.TextField( default= '...')
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.text
+
+    class Meta:
+        ordering = ['-created_date']
+
+
+
