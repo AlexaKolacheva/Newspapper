@@ -1,0 +1,20 @@
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    {% for article in article_list %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-lg">
+            {% if article.image_url %}
+            <img src="{{ article.image_url.url }}" class="card-img-top article-image" alt="{{ article.title }}">
+            {% else %}
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Flag_of_Kyrgyzstan.svg/1200px-Flag_of_Kyrgyzstan.svg.png" class="card-img-top article-image" alt="{{ article.title }}">
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <button type="submit">Save Changes</button>
+</form>
+{% endblock content %}

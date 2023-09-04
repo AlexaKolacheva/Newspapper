@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        {% for article in article_list %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-lg">
+                {% if article.image_url %}
+                <img src="{{ article.image_url.url }}" class="card-img-top article-image" alt="{{ article.title }}">
+                {% else %}
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Flag_of_Kyrgyzstan.svg/1200px-Flag_of_Kyrgyzstan.svg.png" class="card-img-top article-image" alt="{{ article.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'detail_article' article.id %}" class="text-dark">{{ article.title }}</a>
+                    </h5>
+                    <p class="card-text">{{ article.content|truncatewords:20 }}</p>
+                    <p class="card-subtitle text-muted mb-2">by {{ article.author }} | {{ article.date }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Username:</strong> {{ user.username }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Email:</strong> {{ user.email }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Phone Number:</strong> {{ user.phone_number }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Bio:</strong> {{ user.bio }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Birthdate:</strong> {{ user.birthdate }}
+                        </div>
+                        <!-- Добавьте другие поля профиля здесь -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if forloop.counter|divisibleby:3 %}</div><div class="row">{% endif %}
+        {% endfor %}
+    </div>
+</div>
+ <a href="{% url 'edit_profile' user.pk %}" > <p> Редактировать профиль </p></a>
+{% endblock %}

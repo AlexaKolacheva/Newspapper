@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title%} Details {% endblock title%}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+<h2>{{ article.title }}</h2>
+  <p class="text-muted">by {{ article.author }} | {{ article.published_date }}</p>
+             {% if article.image_url %}
+            <img src="{{ article.image_url.url }}" class="card-img-top article-image" alt="{{ article.title }}">
+            {% else %}
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Flag_of_Kyrgyzstan.svg/1200px-Flag_of_Kyrgyzstan.svg.png" class="card-img-top article-image" alt="{{ article.title }}">
+            {% endif %}
+
+  <div>{{ article.content | safe }}</div>
+            <hr>
+            <p class="tag-container">
+                <strong>Tags:</strong>
+            {% for tag in article.tags.all%}
+              <a href="{% url 'get_article_by_tag' tag.id %}">
+                  <span class="badge bg-primary-gradient">#{{tag.tag_name}}</span>
+              </a>
+              {% endfor %}
+                </p>
+        </div>
+</div>
+    </div>
+
+<h3 >Комментарии</h3>
+{% if error_message %}
+        <p class="error">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Отправить комментарий</button>
+    </form>
+
+ {% for comment in article.comments_set.all %}
+        <div class="comment">
+            <p>{{ comment.text }}</p>
+            <p>Автор: {{ comment.user.username }}</p>
+            <p>Дата: {{ comment.created_date }}</p>
+        </div>
+    {% empty %}
+        <p>Комментариев пока нет.</p>
+    {% endfor %}
+</div>
+
+<a href="{% url 'delete_article' article.id %}" class="button"><p> Delete </p></a>
+<a href="{% url 'edit_article' article.id %}"  class="button"><p> Edit </p></a>
+<a href="{% url 'index' %}"><p> Back to Article List </p></a>
+
+{% endblock content %}
+
