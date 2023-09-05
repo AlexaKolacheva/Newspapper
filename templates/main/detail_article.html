@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title%} Details {% endblock title%}
 
 {% block content %}
@@ -16,7 +18,19 @@
             {% endif %}
 
   <div>{{ article.content | safe }}</div>
+
+
             <hr>
+            <p> Просмотры: {{article.views}}</p>
+            <a id="like-button" href="{% url 'like_article' article.id %}" class="like-button">
+                                <img src="{% if user_has_liked %}
+                                                {% static 'heart-solid.svg' %}
+                                           {% else %}
+                                                {% static 'heart-regular.svg' %}
+                                           {% endif %}"
+                                     alt="Like" style="margin-bottom: 3px;">
+                            <span id="like-count" class="like-count">{{ article.likes.count }}</span> Нравится
+                        </a>
             <p class="tag-container">
                 <strong>Tags:</strong>
             {% for tag in article.tags.all%}
@@ -26,6 +40,7 @@
               {% endfor %}
                 </p>
         </div>
+
 </div>
     </div>
 <div class="comments mt-3">
@@ -60,11 +75,9 @@
     <button type="submit" class="btn btn-success">Отправить комментарий</button>
 </form>
 
-{% if request.user == article.author %}
+
 <a href="{% url 'delete_article' article.id %}" class="button"><p> Delete </p></a>
 <a href="{% url 'edit_article' article.id %}"  class="button"><p> Edit </p></a>
-{% endif%}
-
 <a href="{% url 'index' %}"><p> Back to Article List </p></a>
 
 {% endblock content %}

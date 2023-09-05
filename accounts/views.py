@@ -67,7 +67,6 @@ def edit_profile(request, pk):
     else:
         form = CustomUserChangeForm(instance=user)
     context = {
-
         'form': form
         }
 

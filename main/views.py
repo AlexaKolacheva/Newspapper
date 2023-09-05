@@ -2,7 +2,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 
-from .models import Article, Category,Tags, Comments
+from .models import Article, Category,Tags, Comments, Like
 from .forms import ArticleForm, CategoryForm, CommentForm
 
 
@@ -40,11 +40,14 @@ def get_article_by_tag(request, tag_id):
 
 def detail_article(request, article_id):
     article = get_object_or_404(Article, id=article_id)
+    article.views +=1
+    article.save()
     form = CommentForm()
-
+    user_has_liked= article.likes.filter(user=request.user.author).exists()
     context = {
         'article': article,
         'form': form,
+        'user_has_liked': user_has_liked
     }
 
     return render(request, 'main/detail_article.html', context)
@@ -82,6 +85,17 @@ def delete_comment(request, comment_id, article_id):
 
     return HttpResponseForbidden("У вас нет прав для удаление этого комментария ")
 
+
+def like_article(request, pk):
+    article = get_object_or_404(Article, id=pk)
+    if request.user.is_authenticated:
+        if request.user.author and article.likes.filter(user=request.user.author).exists():
+            article.likes.filter(user=request.user.author).delete()
+        else:
+            article.likes.create(user=request.user.author)
+        return redirect('detail_article', pk=article.id)
+
+    return redirect('login')
 
 
 def create_article(request):
